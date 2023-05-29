@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Login - Registration</title>
+        <script src="/js/script.js"></script>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <form action="login" method="POST">
+            <h1>Login</h1>
+            <label>Email Address: <input type="text" name="email" value="reguyal@gmail.com"></label>
+            <label>Password: <input type="password" name="password" value="password"></label>
+            <input id="login" type="submit" value="Login">
+        </form>
+<%  if(errors) { 
+        for(let i = 0; i < errors.length; i++){
+%>
+        <p class="errors"><%= errors[i] %></p>
+<% 
+        }
+    }  
+    if(success){
+%>
+        <p class="success"><%= success %></p>
+<%
+    }
+%>
+        <form action="/register" method="POST">
+            <h1>Register</h1>
+            <label>First Name: <input type="text" name="first_name" value= <%= reg_data == undefined?'':reg_data.first_name %> ></label>
+            <label>Last Name: <input type="text" name="last_name" value=<%= reg_data == undefined?'':reg_data.last_name %>></label>
+            <label>Email Address: <input type="text" name="email" value=<%= reg_data == undefined?'':reg_data.email %>></label>
+            <label>Password: <input type="password" name="password" value="password"></label>
+            <label>Confirm Password: <input type="password" name="confirm_password" value="password"></label>
+            <input id="register" type="submit" value="Register">    
+        </form>
+    </body>
+</html>

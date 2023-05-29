@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Wall</title>
+</head>
+<body>
+    <h1>This is the Wall</h1>
+    <a href="/logoff">Logoff</a>
+    <h2><%= `Welcome, ${ user_info[0].user_name }` %></h2>
+    <h3>Post a Message</h3>
+    <form action="/add-message" method="POST">
+        <input type="text" name="message">
+        <input type="submit" value="Post Message">
+    </form>
+    <div id="messages">
+    <% 
+        for(message in posts){
+            let date = new Date(posts[message].created_at);
+            let options = { year: 'numeric', month: 'long', day: 'numeric' }
+            let created_date = date.toLocaleDateString('en-US', options);
+    %>
+        <p><b><%= `${ posts[message].poster_name } - ${ created_date }` %></b></p>
+        <p style="margin-left: 10px;"><%= `${ posts[message].message }` %></p>
+        <form action="/delete-message" method="POST">
+            <input type="hidden" name="poster_id" value="<%= posts[message].user_id %>">
+            <input type="hidden" name="message_id" value="<%= posts[message].id %>">
+            <input type="submit" value="Delete">
+        </form>
+
+        <div class="comments" style="margin-left: 20px;">
+    <%
+            if(posts[message].message_comments !== null){
+                for(let comment = posts[message].message_comments.length - 1; comment >= 0; comment--) {
+                    let date = new Date(posts[message].message_comments[comment].created_at);
+                    let options = { year: 'numeric', month: 'long', day: 'numeric' }
+                    let created_date = date.toLocaleDateString('en-US', options);
+
+    %>
+            <p><b><%= `${ posts[message].message_comments[comment].commenter_name } - ${ created_date }` %></b></p>   
+            <p style="margin-left: 10px;"><%= `${ posts[message].message_comments[comment].comment }` %></p>
+            <form action="/delete-comment" method="POST">
+                <input type="hidden" name="commenter_id" value="<%= posts[message].message_comments[comment].commenter_id %>">
+                <input type="hidden" name="comment_id" value="<%= posts[message].message_comments[comment].id %>">
+                <input type="submit" value="Delete">
+            </form>             
+    <% 
+                }
+            }
+    %>
+        <h4>Post a Comment</h4>
+        <form action="/add-comment" method="POST">
+            <input type="hidden" name="message_id" value="<%= posts[message].id %>">
+            <input type="text" name="comment">
+            <input type="submit" value="Post Comment">
+        </form>
+        </div>
+    <%  } %>
+    </div>
+</body>
+</html>
