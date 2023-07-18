@@ -1,24 +1,20 @@
 import User from "../models/User.js";
 import Message from "../models/Message.js";
 import Comment from "../models/Comment.js";
+import FormChecker from "../helpers/FormChecker.js";
 
 class Wall {
     async index(request, response) {
-        if(!request.session.user_id) {
-            response.redirect('/');
-            return;
-        }
-
         let user                  = await User.getUserbyID(request.session.user_id);
         let messages_and_comments = await Message.fetchAllMessagesAndComments();
 
-        response.render('wall\\index', { user_info: user.result, posts: messages_and_comments.result });
+        response.render('wall/index', { user_info: user.result, posts: messages_and_comments.result });
     }
 
     async postMessage(request, response) {
-        let is_valid = Message.validateMessageForm(request.body);
+        let message_form_result = FormChecker.checkForm(request.body);
 
-        if(is_valid) {
+        if(message_form_result.status) {
             let result = await Message.createMessage(request.session.user_id, request.body.message);
         }
 
@@ -26,9 +22,9 @@ class Wall {
     }
 
     async removeMessage(request, response) {
-        let is_responsible = (request.session.user_id == request.body.poster_id)? true: false ;
+        let is_the_poster = await Message.checkDeletionValidity({ user_id: request.session.user_id, message_id: request.body.message_id });
 
-        if(is_responsible) {
+        if(is_the_poster.status) {
             let result = await Message.deleteMessage(request.body.message_id);
         }
 
@@ -36,9 +32,9 @@ class Wall {
     }
 
     async postComment(request, response) {
-        let is_valid = Comment.validateCommentForm(request.body);
+        let comment_form_result = FormChecker.checkForm(request.body);
 
-        if(is_valid) {
+        if(comment_form_result.status) {
             let result = await Comment.createComment(request.session.user_id , request.body.message_id,request.body.comment);
         }
 
@@ -47,11 +43,9 @@ class Wall {
 
     
     async removeComment(request, response) {
-        let is_responsible = (request.session.user_id == request.body.commenter_id)? true: false ;
+        let is_the_poster = await Comment.checkDeletionValidity({ user_id: request.session.user_id, comment_id: request.body.comment_id });
 
-        console.log(request.body.comment_id);
-        console.log(is_responsible);
-        if(is_responsible) {
+        if(is_the_poster.status) {
             let result = await Comment.deleteComment(request.body.comment_id);
         }
 

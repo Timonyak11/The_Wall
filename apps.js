@@ -1,7 +1,7 @@
 import Express from "express";
 import { portConfig, sessionConfig } from "./config/appsConfig.js";
 import bodyParser from "body-parser";
-import routes from "./routes.js";
+import routes from "./routes/routes.js";
 
 const app = Express();
 

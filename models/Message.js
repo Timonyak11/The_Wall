@@ -37,10 +37,6 @@ class Message extends Database {
         return response_data;
     }
 
-    validateMessageForm(form_data) {
-        return (form_data.message !== '')? true: false ;
-    }
-
     async createMessage(user_id, message) {
         let response_data = { status: true, result: null, message: 'Message successfuly posted', error: null }
         let query = `INSERT INTO messages (user_id, message, created_at, updated_at) VALUES (?, ?, NOW(), NOW());`;
@@ -70,6 +66,36 @@ class Message extends Database {
             response_data.status = false;
             response_data.message = 'Sorry, Unable to delete message';
             response_data.error = err;
+        }
+
+        return response_data;
+    }
+
+    async getMessagebyID(message_id) {
+        let response_data = { status: true, result: null, message: 'Message successfuly retrieved', error: null }
+        let query = `SELECT * FROM the_wall.messages WHERE id = ?`;
+        let values = [message_id];
+
+        try {
+            response_data.result = await this.execQuery(query, values);
+        }
+        catch(error) {
+            response_data.status = false;
+            response_data.message = 'Sorry, Unable to retrieve message';
+            response_data.error = error;
+        }
+
+        return response_data;
+    }
+
+    async checkDeletionValidity(data) {
+        let message_data = await this.getMessagebyID(data.message_id);
+
+        let response_data = { status: true, message: 'Confirmed Poster' }
+        
+        if(message_data.result[0].user_id !== data.user_id) {
+            response_data.status = false;
+            response_data.message = 'Not the Poster';
         }
 
         return response_data;

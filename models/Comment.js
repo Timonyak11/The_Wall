@@ -38,6 +38,36 @@ class Comment extends Database {
 
         return response_data;
     }
+
+    async getCommentbyID(comment_id) {
+        let response_data = { status: true, result: null, message: 'Comment successfuly retrieved', error: null }
+        let query = `SELECT * FROM the_wall.comments WHERE id = ?`;
+        let values = [comment_id];
+
+        try {
+            response_data.result = await this.execQuery(query, values);
+        }
+        catch(error) {
+            response_data.status = false;
+            response_data.message = 'Sorry, Unable to retrieve comment';
+            response_data.error = error;
+        }
+
+        return response_data;
+    }
+
+    async checkDeletionValidity(data) {
+        let comment_data = await this.getCommentbyID(data.comment_id);
+
+        let response_data = { status: true, message: 'Confirmed Poster' }
+        
+        if(comment_data.result[0].user_id !== data.user_id) {
+            response_data.status = false;
+            response_data.message = 'Not the Poster';
+        }
+
+        return response_data;
+    }
 }
 
 export default new Comment; 

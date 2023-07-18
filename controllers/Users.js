@@ -1,12 +1,8 @@
 import User from "../models/User.js";
+import FormChecker from "../helpers/FormChecker.js";
 
 class Users{
     index(request, response) {   
-        if(request.session.user_id) {
-            response.redirect('/wall');
-            return;
-        }
-
         let error_message = null;
         let success_message = null;
         let prev_reg_data = null;
@@ -21,21 +17,22 @@ class Users{
             delete request.session.register_input;
         }
 
-        response.render('login_register\\index', { errors: error_message, success: success_message, reg_data: prev_reg_data });
+        response.render('login_register/index', { errors: error_message, success: success_message, reg_data: prev_reg_data });
     }
 
     async loginProcess(request, response) {
-        let is_valid = User.validateLoginForm(request.body);
-
-        if(!is_valid) {
-            request.session.errors = ['All fields must be filled!'];
+        let login_input_result = FormChecker.checkForm({ email: request.body.email, password: request.body.password });
+        
+        if(!login_input_result.status) {
+            request.session.errors = login_input_result.error_message;
             response.redirect('/');
-        } 
+        }   
         else {
             let user = await User.getUserByEmail(request.body.email);
-            let result = await User.validateLoginMatch(user.data, request.body.password);
+            let result = await User.validateLoginMatch(user.result, request.body.password);
+            
             if(result == 'success') {
-                request.session.user_id = user.data[0].id;
+                request.session.user_id = user.result[0].id;
                 response.redirect('/wall');
             } 
             else {
@@ -46,15 +43,15 @@ class Users{
     }
 
     async registerProcess(request, response) {
-        let validation = await User.validateRegisterForm(request.body);
-        
-        if(validation.length > 0) {
-            request.session.errors = validation;
+        let register_input_result = FormChecker.checkForm(request.body);
+
+        if(!register_input_result.status) {
+            request.session.errors = register_input_result.error_message;
             request.session.register_input = request.body;
             response.redirect('/');
         } 
         else {
-            let registration_result = await User.addUser(request.body);
+            let registration_result = await User.addUser({ first_name: request.body.first_name, last_name: request.body.last_name, email: request.body.email, password: request.body.password });
             
             if(registration_result.status) {
                 request.session.success = registration_result.message;

@@ -7,6 +7,7 @@ class User extends Database {
         let response_data = { status: true, result: null, message: 'User Addedd Successfully!', error: null };
         let query = 'INSERT INTO users (first_name, last_name, email, password, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())';
         user_data.password = bcrypt.hashSync(user_data.password, 10);
+
         let values = [user_data.first_name, user_data.last_name, user_data.email, user_data.password];
 
         try {
@@ -19,39 +20,6 @@ class User extends Database {
         }
 
         return response_data;
-    }
-
-    async validateRegisterForm(input_info) {
-        let message = [];
-        
-        if(input_info.first_name == '' || input_info.last_name == '' || input_info.email == '' || input_info.password == '' || input_info.confirm_password == '') {
-            message.push('All fields must be filled!');
-        } 
-        else if(!input_info.email.includes('@')) {
-            message.push('Invalid Email Format!');
-        } 
-        else if(input_info.password.length < 8) {
-            message.push('Password must have atleast 8 characters!');
-        }
-
-        if(input_info.first_name.length < 2 || input_info.last_name.length < 2) {
-            message.push('First Name and Last Name must have atleast 2 characters');
-        }
-        
-        if(input_info.password != input_info.confirm_password) {
-            message.push('Password and Confirm Password does not match!');
-        } 
-        
-        let result = await this.getUserByEmail(input_info.email);
-        if(result.status && result.is_taken) {
-            message.push( result.message );
-        }
-
-        return message;
-    }
-
-    validateLoginForm(input_info){
-        return (input_info.email === '' || input_info.password === '') ? false : true;
     }
 
     async validateLoginMatch(user, password){
@@ -68,16 +36,16 @@ class User extends Database {
         let query = 'SELECT * FROM users WHERE email = ?';
 
         try {
-            response_data.data = await this.execQuery(query, [user]);
+            response_data.result = await this.execQuery(query, [user]);
   
-            if(response_data.data.length > 0) {
+            if(response_data.result.length > 0) {
                 response_data.message = 'Email Already Taken!';
                 response_data.is_taken = true;
             }
         }
-        catch(err) {
+        catch(error) {
             response_data.status = false;
-            response_data.error = err;
+            response_data.error = error;
         }
 
         return response_data;

@@ -22,7 +22,6 @@
         <p><b><%= `${ posts[message].poster_name } - ${ created_date }` %></b></p>
         <p style="margin-left: 10px;"><%= `${ posts[message].message }` %></p>
         <form action="/delete-message" method="POST">
-            <input type="hidden" name="poster_id" value="<%= posts[message].user_id %>">
             <input type="hidden" name="message_id" value="<%= posts[message].id %>">
             <input type="submit" value="Delete">
         </form>
@@ -39,7 +38,6 @@
             <p><b><%= `${ posts[message].message_comments[comment].commenter_name } - ${ created_date }` %></b></p>   
             <p style="margin-left: 10px;"><%= `${ posts[message].message_comments[comment].comment }` %></p>
             <form action="/delete-comment" method="POST">
-                <input type="hidden" name="commenter_id" value="<%= posts[message].message_comments[comment].commenter_id %>">
                 <input type="hidden" name="comment_id" value="<%= posts[message].message_comments[comment].id %>">
                 <input type="submit" value="Delete">
             </form>             
